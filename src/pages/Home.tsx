@@ -20,10 +20,14 @@ function Home() {
   {
     const token = localStorage.getItem("token")
 
+    if(!token) 
+    {
+      navigate("/")
+      return; 
+    }
     fetch('http://127.0.0.1:3001/api/auth/get_user/', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token }),
+      headers: { 'Content-Type': 'application/json', 'auth': token }
     })
       .then((res) => res.json())
       .then((data) => {

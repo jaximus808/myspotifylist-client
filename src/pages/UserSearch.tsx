@@ -10,7 +10,7 @@ import SongDisplay from '../components/SongItem';
 
 
 
-function SongSearch() {
+function UserSearch() {
 
   const navigate = useNavigate();
 
@@ -22,71 +22,13 @@ function SongSearch() {
   useEffect(()=>
   {
 
-    getMusic()
+    get_music()
     
   }, [navigate, setSongs, location.search])
 
-  const getMusic = ()=>
+  const get_music = ()=>
   {
-    const params : URLSearchParams = new URLSearchParams(window.location.search);
-    const song_query : string|null = params.get('query_name');
-
-    const page : string|null = params.get('page');
-
-    const code = localStorage.getItem("token")
-
-    let page_num:number = 0;
-    if(!page)
-    {
-      page_num = 0;  
-    }
-    else 
-    {
-      if(!isNaN(parseInt(page)))
-        {
-          page_num = parseInt(page);
-        }
-    }
     
-    
-    if(!song_query){
-      console.log("missing song query")
-      return
-    }
-    if(!code)
-    {
-      navigate("/")
-      return 
-    }
-    fetch('http://127.0.0.1:3001/api/auth/request_song', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json', 
-        'auth':code },
-      body: JSON.stringify({ song_query, page_num }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-
-         console.log(data)
-         if(data.error)
-         {
-          //localStorage.removeItem("token")
-
-         }
-         else 
-         {
-          setCurrentRatings(data.ratings)
-          setSongs(data.songs)
-          console.log(data)
-         }
-      })
-      .catch((err) => 
-        {
-          console.error('Error exchanging token:', err)
-          setStatus("something went wrong :( refresh plz!")
-        }
-        );
   }
 
   return (
@@ -132,4 +74,4 @@ function SongSearch() {
   );
 }
 
-export default SongSearch;
+export default UserSearch;
