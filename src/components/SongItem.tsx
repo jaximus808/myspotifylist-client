@@ -1,6 +1,7 @@
 import React, {ChangeEvent, useState} from 'react';
 import '../App.css';
 
+const API_URL = import.meta.env.VITE_API_URL
 type Props = 
 {
     imageHref: string;
@@ -26,6 +27,7 @@ function SongDisplay(props:Props)
     const [rating, setRating] = useState<number|string>(!props.rating || props.rating == -1 ? "" : props.rating )
 
     const [desc, setDesc] = useState<string>(!props.desc || !props.rating || props.rating == -1 ? "" : props.desc  )
+
 
     const updateRating = (e: ChangeEvent<HTMLInputElement>) => 
     {
@@ -65,13 +67,17 @@ function SongDisplay(props:Props)
         }
 
         
-        fetch("http://127.0.0.1:3001/api/auth/create_rating", {
+        fetch(`${API_URL}api/auth/create_rating`, {
             method:"POST",
             headers: { 'Content-Type': 'application/json', "auth": code },
             body: JSON.stringify({
                 "song_id": props.song_id,
                 "rating": rating,
-                "desc": desc
+                "desc": desc,
+                "song_name": props.songName,
+                "album_name": props.albumName,
+                "artist_name": props.artistName,
+                "image_href": props.imageHref
              }),
         }).then(res => res.json())
         .then((data) => {

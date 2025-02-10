@@ -8,6 +8,11 @@ import SearchBar from '../components/SearchBar';
 import '../App.css';
 import SongDisplay from '../components/SongItem';
 
+const API_URL = import.meta.env.VITE_API_URL
+type PageData = {
+  songs: any[],
+  ratings: any
+}
 
 
 function SongSearch() {
@@ -16,15 +21,18 @@ function SongSearch() {
 
   const [status, setStatus] = useState<string>("Loading...")
 
-  const [songs, setSongs] = useState<any[]>([])
+  const [pageData, setPageData] = useState<PageData>({
+    songs: [],
+    ratings: {}
+  })
+  
+  // const [songs, setSongs] = useState<any[]>([])
 
-  const [currentRatings, setCurrentRatings] = useState<any>({})
+  // const [currentRatings, setCurrentRatings] = useState<any>({})
   useEffect(()=>
   {
-
-    getMusic()
-    
-  }, [navigate, setSongs, location.search])
+    getMusic() 
+  }, [navigate, location.search])
 
   const getMusic = ()=>
   {
@@ -58,7 +66,7 @@ function SongSearch() {
       navigate("/")
       return 
     }
-    fetch('http://127.0.0.1:3001/api/auth/request_song', {
+    fetch(`${API_URL}api/auth/request_song`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json', 
@@ -76,8 +84,12 @@ function SongSearch() {
          }
          else 
          {
-          setCurrentRatings(data.ratings)
-          setSongs(data.songs)
+
+          setPageData({
+            songs: data.songs,
+            ratings: {...data.ratings},
+
+          })
           console.log(data)
          }
       })
@@ -100,12 +112,13 @@ function SongSearch() {
           
 
         {
-          (songs.length > 0) ?
+          (pageData.songs.length > 0) ?
 
           <div className='w-7/8 lg:w-[50rem]'>
-            {songs.map((song, i) => {
+            {pageData.songs.map((song, _) => {
 
-            //console.log(song)
+
+              //console.log(pageData)
 
             const song_name = song.name
             const album_name = song.album.name
@@ -116,12 +129,13 @@ function SongSearch() {
 
             const song_id = song.id
 
-            const rating = currentRatings[song_id] ? currentRatings[song_id].rating : -1
-            const desc = currentRatings[song_id] ? currentRatings[song_id].desc : -1
-              //console.log(currentRatings[song_id])
+            const rating = pageData.ratings[song_id] ? pageData.ratings[song_id].rating : -1
+            const desc = pageData.ratings[song_id] ? pageData.ratings[song_id].desc : -1
+            
+            //console.log(rating)
               
 
-            return <SongDisplay key={i} song_id={song_id} songName={song_name} albumName={album_name} imageHref={imageHref} artistName={artistName} date_posted={datePosted} songLink={songLink} rating={rating} desc={desc}/>
+            return (<SongDisplay key={song_id} song_id={song_id} songName={song_name} albumName={album_name} imageHref={imageHref} artistName={artistName} date_posted={datePosted} songLink={songLink} rating={rating} desc={desc}/>)
             })}
           </div> : <div className='mt-2'>{status}</div>
         }

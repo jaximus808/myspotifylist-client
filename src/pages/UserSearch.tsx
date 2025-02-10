@@ -2,13 +2,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
-import Welcome from '../components/Welcome';
 import SearchBar from '../components/SearchBar';
 
 import '../App.css';
-import SongDisplay from '../components/SongItem';
+import UserDisplay from '../components/UserItem';
 
 
+const API_URL = import.meta.env.VITE_API_URL
 
 function UserSearch() {
 
@@ -16,19 +16,63 @@ function UserSearch() {
 
   const [status, setStatus] = useState<string>("Loading...")
 
-  const [songs, setSongs] = useState<any[]>([])
+  const [users, setUsers] = useState<any[]>([])
 
-  const [currentRatings, setCurrentRatings] = useState<any>({})
   useEffect(()=>
   {
 
-    get_music()
+    searchUsers()
     
-  }, [navigate, setSongs, location.search])
+  }, [navigate, setUsers, location.search])
 
-  const get_music = ()=>
+  const searchUsers = ()=>
   {
-    
+    const params : URLSearchParams = new URLSearchParams(window.location.search);
+    const user_query : string|null = params.get('query_name');
+
+
+    const code = localStorage.getItem("token")
+    if(!user_query){
+        console.log("missing user query")
+        return
+    }
+    if(!code)
+    {
+        navigate("/")
+        return 
+    }
+    fetch(`${API_URL}api/auth/search_user`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json', 
+            'auth':code },
+        body: JSON.stringify({ user_query }),
+        })
+        .then((res) => res.json())
+        .then((data) => {
+
+            console.log(data)
+            if(data.error)
+            {
+            //localStorage.removeItem("token")
+
+            }
+            else 
+            {
+                setUsers(data.user_matches)
+                if(data.user_matches.length === 0)
+                {
+                    setStatus("we couldnt find anyone simillar :(")
+                }
+                console.log(data)
+            }
+        })
+        .catch((err) => 
+        {
+            console.error('Error exchanging token:', err)
+            setStatus("something went wrong :( refresh plz!")
+        }
+    );
   }
 
   return (
@@ -37,33 +81,23 @@ function UserSearch() {
       <header className="App-header p-4">
         <h1 className='font-bold text-3xl'>Song Search: <span className='italic'> {new URLSearchParams(window.location.search).get('query_name')}</span></h1>
         <a href='/home' className='italic text-blue-400 underline text-base'>{"<< Go Back"}</a>
-        <SearchBar placeholder="search another..." className="w-54" href={"search_song"}/>
+        <SearchBar placeholder="search another..." className="w-54" href={"search_user"}/>
 
           
 
         {
-          (songs.length > 0) ?
+          (users.length > 0) ?
 
           <div className='w-7/8 lg:w-[50rem]'>
-            {songs.map((song, i) => {
+            {users.map((user, i) => {
 
             //console.log(song)
+                
+                const uuid = user.uid
+                const display_name = user.display_name
+                const imageHref = user.image_href
 
-            const song_name = song.name
-            const album_name = song.album.name
-            const imageHref = song.album.images[1].url
-            const artistName = song.album.artists.map(artist => artist.name).join(", ")
-            const datePosted = song.album.release_date
-            const songLink = song.external_urls.spotify
-
-            const song_id = song.id
-
-            const rating = currentRatings[song_id] ? currentRatings[song_id].rating : -1
-            const desc = currentRatings[song_id] ? currentRatings[song_id].desc : -1
-              //console.log(currentRatings[song_id])
-              
-
-            return <SongDisplay key={i} song_id={song_id} songName={song_name} albumName={album_name} imageHref={imageHref} artistName={artistName} date_posted={datePosted} songLink={songLink} rating={rating} desc={desc}/>
+                return <UserDisplay key={i} uuid={uuid} displayName={display_name} imageHref={imageHref}/>
             })}
           </div> : <div className='mt-2'>{status}</div>
         }

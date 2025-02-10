@@ -26,7 +26,7 @@ function Callback() {
               console.log(data)
               console.error('Spotify Auth Error!');
 
-              localStorage.setItem("token", data.token);
+              localStorage.clear()
               navigate('/', { replace: true }); // Redirect to error page if needed
               return 
             }

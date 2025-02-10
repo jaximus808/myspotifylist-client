@@ -6,7 +6,7 @@ function Landing() {
   const redirectUri = encodeURIComponent('http://localhost:3000/callback');
   const scopes = encodeURIComponent("user-library-read")
 
-  const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scopes}`;
+  const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&show_dialog=true&scope=${scopes}`;
 
 
 
